@@ -1,11 +1,13 @@
-import React, { createRef, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Button, Card, Input, Form, CardImg } from "reactstrap";
 import { ProfileImg } from "../../assets/images";
-import { Formik, useFormik } from "formik";
+import { useFormik } from "formik";
 import * as Yup from "yup";
-import { Link } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
+import { setLocalStorage } from "../../utils/storageUtils";
 
 function Login() {
+  const history = useHistory();
   const textInput = useRef();
   const formik = useFormik({
     enableReinitialize: true,
@@ -18,7 +20,10 @@ function Login() {
       password: Yup.string().required("Password is empty").nullable(),
     }),
 
-    onSubmit: (loginDetailsSubmit) => {},
+    onSubmit: (values) => {
+      setLocalStorage("username", values.userName);
+      history.push("/dashboard");
+    },
   });
 
   useEffect(() => {
