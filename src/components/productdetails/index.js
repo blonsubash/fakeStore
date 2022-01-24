@@ -1,55 +1,104 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
+// import {
+//   fetchSelectedProduct,
+//   fetchSpecificCategory,
+// } from "../../services/productServices";
 import {
-  fetchSelectedProduct,
-  fetchSpecificCategory,
-} from "../../services/productServices";
-import { Card, CardBody, CardImg, CardText, CardTitle } from "reactstrap";
+  Button,
+  Card,
+  CardBody,
+  CardImg,
+  CardText,
+  CardTitle,
+} from "reactstrap";
 import "./productdetails.scss";
 import SpecificCategory from "../specificcategory";
+import { useLocation, withRouter } from "react-router-dom";
+import { UserContext } from "../../utils/userContext";
+import { connect } from "react-redux";
+import {
+  fetchSingleProduct,
+  fetchSpecificCategory,
+} from "../../action/ActionCreaters";
 
-const ProductDetails = () => {
-  let params = new URLSearchParams(document.location.search);
-  // let productId = parseInt(params.get("id"));
-  // let productCategory = params.get("category");
-  const [productItem, setProductItem] = useState({});
-  const [category, setCategory] = useState([]);
+const ProductDetails = (props) => {
+  const {
+    fetchSingleProduct,
+    singleProduct,
+    fetchSpecificCategory,
+    specificCategory,
+    productLoading,
+    productError,
+  } = props;
+  let params = new URLSearchParams(useLocation().search);
+  const [category, setCategory] = useState(params.get("category"));
   const [productId, setProductId] = useState(parseInt(params.get("id")));
+  const { cartItems, setCartItems } = useContext(UserContext);
 
   useEffect(() => {
     setProductId(parseInt(params.get("id")));
   }, [params.get("id")]);
-  console.log("Param ID", params.get("id"));
 
   useEffect(() => {
-    fetchSelectedProduct(productId).then((data) => {
-      setProductItem(data);
-      console.log("Data", data);
+    setCategory(params.get("category"));
+  }, [params.get("category")]);
 
-      fetchSpecificCategory(data?.category).then((data) => {
-        setCategory(data);
-      });
-    });
-    console.log("Produc ID use Effect", productId);
+  useEffect(() => {
+    fetchSingleProduct(productId);
+    fetchSpecificCategory(category);
   }, [productId]);
 
-  console.log("porduct id outside", productId);
-  if (productItem.title) {
+  console.log("item", singleProduct);
+  console.log("categories", specificCategory);
+
+  const addtoCart = (wishItem) => {
+    const checkID = wishItem.id;
+    setCartItems((prevState) => {
+      console.log("prevstate", prevState);
+      let similarItem = prevState.find((item) => item.id === checkID);
+      if (similarItem) {
+        similarItem.count = similarItem.count + 1;
+
+        return [
+          ...prevState.filter((item) => item.id !== checkID),
+          similarItem,
+        ];
+      } else {
+        const newItem = {};
+        newItem.count = 1;
+        newItem.id = wishItem.id;
+        newItem.image = wishItem.image;
+        newItem.title = wishItem.title;
+        newItem.price = wishItem.price;
+        return [...prevState, newItem];
+      }
+    });
+  };
+
+  if (singleProduct?.title) {
     return (
       <div className="productDetails">
         <Card className="productDetailsCard">
           <Card className="productImage">
-            <CardImg src={productItem.image} alt={productItem.title} />
+            <CardImg src={singleProduct.image} alt={singleProduct.title} />
           </Card>
           <Card className="productDescription">
             <CardBody>
-              <CardTitle>{productItem.title}</CardTitle>
-              <CardText>{productItem.description}</CardText>
-              <CardText>$ {productItem.price}</CardText>
+              <CardTitle>{singleProduct.title}</CardTitle>
+              <CardText>{singleProduct.description}</CardText>
+              <CardText>$ {singleProduct.price}</CardText>
+              <Button onClick={() => addtoCart(singleProduct)}>
+                Add to Cart
+              </Button>
             </CardBody>
           </Card>
         </Card>
-        {category.length > 0 && (
-          <SpecificCategory productId={productId} category={category} />
+        {category && (
+          <SpecificCategory
+            productId={productId}
+            category={specificCategory}
+            addtoCart={addtoCart}
+          />
         )}
       </div>
     );
@@ -57,4 +106,28 @@ const ProductDetails = () => {
     return <span> Loading ... </span>;
   }
 };
-export default ProductDetails;
+
+const mapStatetoProps = (state) => {
+  return {
+    singleProduct: state.productReducer.singleProduct,
+
+    productLoading: state.productReducer.singleProductLoading,
+    productError: state.productReducer.singleProductErr,
+    specificCategory: state.productReducer.allData,
+    productsLoading: state.productReducer.isLoading,
+    productsError: state.productReducer.errmsg,
+  };
+};
+
+const mapDispatchtoProps = (dispatch) => ({
+  fetchSingleProduct: (id) => {
+    dispatch(fetchSingleProduct(id));
+  },
+  fetchSpecificCategory: (category) => {
+    dispatch(fetchSpecificCategory(category));
+  },
+});
+
+export default withRouter(
+  connect(mapStatetoProps, mapDispatchtoProps)(ProductDetails)
+);

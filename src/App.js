@@ -4,8 +4,8 @@ import Dashboard from "./components/dashboard";
 import "./assets/css/common.scss";
 import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 import ProductDetails from "./components/productdetails";
-import { Navbar } from "reactstrap";
-import SpecificCategory from "./components/specificcategory";
+import NavigationBar from "./components/navbar";
+import MyCartList from "./mycartlist";
 
 function App() {
   return (
@@ -19,16 +19,17 @@ function App() {
             <Registration />
           </Route>
           <Route exact path={"/dashboard"}>
+            <NavigationBar />
             <Dashboard />
           </Route>
           <Route exact path={"/productdetails"}>
+            <NavigationBar />
             <ProductDetails />
-            {/* <SpecificCategory /> */}
           </Route>
-          {/* <Route exact path={"/specificcategory"}>
-            <ProductDetails />
-            <SpecificCategory />
-          </Route> */}
+          <Route exact path={"/mycart"}>
+            <NavigationBar />
+            <MyCartList />
+          </Route>
         </Switch>
       </div>
     </Router>

@@ -3,10 +3,18 @@ import ReactDOM from "react-dom";
 import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 import "bootstrap/dist/css/bootstrap.min.css";
+import UserProvider from "./utils/userContext";
+// store.subscribe(() => store.getState());
+import { Provider } from "react-redux";
+import store from "./store";
 
 ReactDOM.render(
   <React.StrictMode>
-    <App />
+    <Provider store={store}>
+      <UserProvider>
+        <App />
+      </UserProvider>
+    </Provider>
   </React.StrictMode>,
   document.getElementById("root")
 );

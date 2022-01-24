@@ -8,7 +8,7 @@
     justify-content: space-between;
     margin-left: auto;
     margin-right: auto;
-    margin-top: 100px;
+    margin-top: 40px;
     box-shadow: 8px 10px 7px -5px #b0b0b0;
   }
 
@@ -34,11 +34,16 @@
     .card-title {
       font-size: 25px;
       font-weight: bold;
+      color: #74d1be;
     }
     .card-text {
       font-size: 18px;
       color: grey;
       text-align: justify;
+    }
+    .btn {
+      background-color: #74d1be;
+      border: none;
     }
   }
   p {

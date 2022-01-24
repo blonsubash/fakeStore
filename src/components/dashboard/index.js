@@ -1,87 +1,66 @@
 import React, { useEffect, useState } from "react";
-// import { Redirect } from "react-router-dom";
-import { getLocalStorage } from "../../utils/storageUtils";
-import { fetchAllProductLists } from "../../services/productServices";
-import { Link, NavLink, Redirect, useHistory } from "react-router-dom";
-import {
-  Card,
-  CardBody,
-  CardImg,
-  CardText,
-  CardTitle,
-  Collapse,
-  Nav,
-  Navbar,
-  NavbarBrand,
-  NavbarToggler,
-  NavItem,
-} from "reactstrap";
+import { useHistory, withRouter } from "react-router-dom";
+import { Card, CardBody, CardImg, CardText, CardTitle } from "reactstrap";
+import { connect } from "react-redux";
+import { fetchData } from "../../action/ActionCreaters";
 import "./dashboard.scss";
-import { MainLogo, userLogo } from "../../assets/images";
 
-const Dashboard = () => {
-  const [username, setUsername] = useState("");
-  const [productItems, setProductItems] = useState([]);
+const Dashboard = (props) => {
+  const { fetchData, allProductItems, productsLoading, productsError } = props;
+  console.log("Props", props);
   const history = useHistory();
 
   useEffect(() => {
-    if (!getLocalStorage("username")) {
-      history.replace("/");
-    } else {
-      setUsername(getLocalStorage("username"));
-    }
-  }, [getLocalStorage("username")]);
-
-  useEffect(() => {
-    fetchAllProductLists().then((data) => {
-      setProductItems(data);
-    });
+    fetchData();
   }, []);
-  console.log(productItems);
-
   return (
     <div className="dashboard">
-      <Navbar expand="md" navbar className="navbar">
-        <NavbarBrand>
-          <img src={MainLogo} />
-        </NavbarBrand>
-        <NavbarToggler />
-        <Collapse navbar>
-          <Nav className="me-auto w-100" navbar>
-            <NavItem>
-              <NavLink to="#" />
-              Add New Product
-            </NavItem>
-            <NavItem className="welcomeUser">Welcome, {username}</NavItem>
-          </Nav>
-        </Collapse>
-        <img style={{ marginLeft: "0px" }} src={userLogo} />
-      </Navbar>
-      <div className="productItemDiv">
-        {productItems.map((items) => (
-          <Card
-            className="productItemCard"
-            key={items.id}
-            onClick={() =>
-              history.push(
-                `/productdetails?id=${items.id}&category=${items.category}`
-              )
-            }
-          >
-            <CardImg src={items.image} alt={items.title} />
+      {productsError && <h1>Error 404!</h1>}
+      {productsLoading ? (
+        <h1> Loading.....</h1>
+      ) : (
+        <div className="productItemDiv">
+          {allProductItems?.map((items) => (
+            <Card
+              className="productItemCard"
+              key={items.id}
+              onClick={() =>
+                history.push(
+                  `/productdetails?id=${items.id}&category=${items.category}`
+                )
+              }
+            >
+              <CardImg src={items.image} alt={items.title} />
 
-            <CardBody>
-              <CardTitle>
-                {items.title.length > 17
-                  ? `${items.title.substring(0, 17)}...`
-                  : items.title}
-              </CardTitle>
-              <CardText> ${items.price}</CardText>
-            </CardBody>
-          </Card>
-        ))}{" "}
-      </div>
+              <CardBody>
+                <CardTitle>
+                  {items.title.length > 17
+                    ? `${items.title.substring(0, 17)}...`
+                    : items.title}
+                </CardTitle>
+                <CardText> ${items.price}</CardText>
+              </CardBody>
+            </Card>
+          ))}{" "}
+        </div>
+      )}
     </div>
   );
 };
-export default Dashboard;
+//mapStatetoProps--> takes current state from the store and converts it into props to be used by the respective component
+const mapStatetoProps = (state) => {
+  return {
+    allProductItems: state.productReducer.allData,
+    productsLoading: state.productReducer.isLoading,
+    productsError: state.productReducer.errmsg,
+  };
+};
+
+const mapDispatchToProps = (dispatch) => ({
+  fetchData: () => {
+    dispatch(fetchData());
+  },
+});
+export default withRouter(
+  connect(mapStatetoProps, mapDispatchToProps)(Dashboard)
+);

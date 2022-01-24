@@ -1,23 +1,6 @@
 @import url("https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap");
 
 .dashboard {
-  .navbar {
-    background-color: #74d1be;
-
-    img {
-      width: 80px;
-      height: 50px;
-      margin-left: 50px;
-      margin-top: 0px;
-    }
-    .nav-item {
-      color: white;
-      margin-left: 50px;
-    }
-    .welcomeUser {
-      margin-left: auto;
-    }
-  }
   .productItemDiv {
     display: flex;
     flex-wrap: wrap;
